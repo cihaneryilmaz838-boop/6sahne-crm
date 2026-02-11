@@ -1,0 +1,107 @@
+<%- include('../_header', { title }) %>
+
+<h1>Reports Dashboard</h1>
+<p class="muted">Generated for <%= generatedAt %></p>
+
+<h2>1) Finance Summary</h2>
+<table>
+  <tbody>
+    <tr>
+      <th>Total IN</th>
+      <td><%= financeSummary.total_in %> TRY</td>
+      <th>Total OUT</th>
+      <td><%= financeSummary.total_out %> TRY</td>
+    </tr>
+    <tr>
+      <th>Today IN</th>
+      <td><%= financeSummary.today_in %> TRY</td>
+      <th>Today OUT</th>
+      <td><%= financeSummary.today_out %> TRY</td>
+    </tr>
+    <tr>
+      <th>This month IN</th>
+      <td><%= financeSummary.month_in %> TRY</td>
+      <th>This month OUT</th>
+      <td><%= financeSummary.month_out %> TRY</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>2) Student Balances</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Total Fee</th>
+      <th>Paid</th>
+      <th>Remaining</th>
+      <th>Overdue</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (studentBalances.length === 0) { %>
+      <tr><td colspan="5">No students with remaining balance.</td></tr>
+    <% } %>
+    <% studentBalances.forEach((student) => { %>
+      <tr>
+        <td><a href="/students/<%= student.id %>"><%= student.full_name %></a></td>
+        <td><%= student.total_fee %> TRY</td>
+        <td><%= student.paid_amount %> TRY</td>
+        <td><strong><%= student.remaining_amount %> TRY</strong></td>
+        <td><%= student.is_overdue ? 'Yes' : 'No' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2>3) Book Stock Summary</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Book</th>
+      <th>Total Quantity (all locations)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (bookStockSummary.length === 0) { %>
+      <tr><td colspan="2">No books found.</td></tr>
+    <% } %>
+    <% bookStockSummary.forEach((book) => { %>
+      <tr>
+        <td><a href="/books/<%= book.id %>"><%= book.title %></a></td>
+        <td><%= book.total_quantity %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2>4) Recent Sales</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Sale ID</th>
+      <th>Created At</th>
+      <th>Book</th>
+      <th>Qty</th>
+      <th>Amount</th>
+      <th>Payment Method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (recentSales.length === 0) { %>
+      <tr><td colspan="6">No sales yet.</td></tr>
+    <% } %>
+    <% recentSales.forEach((sale) => { %>
+      <tr>
+        <td><%= sale.id %></td>
+        <td><%= sale.created_at %></td>
+        <td><%= sale.book_title %></td>
+        <td><%= sale.quantity %></td>
+        <td><%= sale.total_amount %> TRY</td>
+        <td><%= sale.payment_method %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../_footer') %>

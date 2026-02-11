@@ -1,9 +1,15 @@
 const express = require('express');
+const service = require('./service');
 
 const router = express.Router();
 
-router.all('*', (req, res) => {
-  res.status(501).send('Not implemented yet');
+router.get('/', (req, res) => {
+  const data = service.getDashboardData();
+
+  return res.render('reports/index', {
+    title: 'Reports Dashboard',
+    ...data,
+  });
 });
 
 module.exports = router;
