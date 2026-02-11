@@ -1,0 +1,58 @@
+<%- include('../_header', { title }) %>
+
+<h1>Move Stock</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/inventory/move">
+  <p>
+    <label>Book
+      <select name="book_id" required>
+        <option value="">Select</option>
+        <% books.forEach((book) => { %>
+          <option value="<%= book.id %>" <%= String(form.book_id) === String(book.id) ? 'selected' : '' %>>
+            <%= book.title %>
+          </option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p>
+    <label>From location
+      <select name="from_location_id">
+        <option value="">(none)</option>
+        <% locations.forEach((location) => { %>
+          <option value="<%= location.id %>" <%= String(form.from_location_id) === String(location.id) ? 'selected' : '' %>><%= location.name %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p>
+    <label>To location
+      <select name="to_location_id">
+        <option value="">(none)</option>
+        <% locations.forEach((location) => { %>
+          <option value="<%= location.id %>" <%= String(form.to_location_id) === String(location.id) ? 'selected' : '' %>><%= location.name %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p>
+    <label>Quantity <input type="number" min="1" step="1" name="quantity" value="<%= form.quantity %>" required></label>
+  </p>
+  <p>
+    <label>Note <input type="text" name="note" value="<%= form.note %>" maxlength="255"></label>
+  </p>
+  <button type="submit">Save Movement</button>
+</form>
+
+<p><a href="/inventory">Back to inventory</a></p>
+
+<%- include('../_footer') %>

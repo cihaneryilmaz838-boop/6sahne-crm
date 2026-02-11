@@ -1,0 +1,50 @@
+<%- include('../_header', { title }) %>
+
+<h1>Inventory</h1>
+
+<p>
+  <a href="/inventory/move">Move Stock</a> |
+  <a href="/inventory/locations">Manage Locations</a>
+</p>
+
+<form method="get" action="/inventory">
+  <label>Book
+    <select name="book_id" onchange="this.form.submit()">
+      <% books.forEach((book) => { %>
+        <option value="<%= book.id %>" <%= Number(selectedBookId) === Number(book.id) ? 'selected' : '' %>>
+          <%= book.title %> <%= book.author ? `- ${book.author}` : '' %>
+        </option>
+      <% }) %>
+    </select>
+  </label>
+  <button type="submit">Show</button>
+</form>
+
+<% if (!selectedBook) { %>
+  <p>No books available yet.</p>
+<% } else { %>
+  <h2><%= selectedBook.title %></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Quantity</th>
+        <th>Updated At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (stockByLocation.length === 0) { %>
+        <tr><td colspan="3">No locations yet.</td></tr>
+      <% } %>
+      <% stockByLocation.forEach((stock) => { %>
+        <tr>
+          <td><%= stock.location_name %></td>
+          <td><%= stock.quantity %></td>
+          <td><%= stock.updated_at || '-' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<%- include('../_footer') %>
