@@ -1,0 +1,104 @@
+<%- include('../_header', { title }) %>
+
+<h1>Finance Ledger</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<p>
+  <a href="/finance/new">+ New Transaction</a>
+  <% if (currentUser.role === 'ADMIN') { %>
+    | <a href="/finance/categories">Manage Categories</a>
+  <% } %>
+</p>
+
+<form method="get" action="/finance">
+  <label>Date from <input type="date" name="date_from" value="<%= filters.date_from %>"></label>
+  <label>Date to <input type="date" name="date_to" value="<%= filters.date_to %>"></label>
+  <label>Direction
+    <select name="direction">
+      <option value="">All</option>
+      <% directionValues.forEach((d) => { %>
+        <option value="<%= d %>" <%= filters.direction === d ? 'selected' : '' %>><%= d %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Category
+    <select name="category_id">
+      <option value="">All</option>
+      <% categories.forEach((c) => { %>
+        <option value="<%= c.id %>" <%= String(filters.category_id) === String(c.id) ? 'selected' : '' %>>
+          <%= c.direction %> - <%= c.name %>
+        </option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Payment
+    <select name="payment_method">
+      <option value="">All</option>
+      <% paymentMethodValues.forEach((p) => { %>
+        <option value="<%= p %>" <%= filters.payment_method === p ? 'selected' : '' %>><%= p %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label><input type="checkbox" name="include_cancelled" value="1" <%= filters.include_cancelled ? 'checked' : '' %>> Include cancelled</label>
+  <button type="submit">Filter</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Date</th>
+      <th>Direction</th>
+      <th>Amount (kuruş)</th>
+      <th>Category</th>
+      <th>Payment</th>
+      <th>Note</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (transactions.length === 0) { %>
+      <tr><td colspan="9">No transactions found.</td></tr>
+    <% } %>
+    <% transactions.forEach((tx) => { %>
+      <tr>
+        <td><%= tx.id %></td>
+        <td><%= tx.date %></td>
+        <td><%= tx.direction %></td>
+        <td><%= tx.amount %> <%= tx.currency %></td>
+        <td><%= tx.category_name %></td>
+        <td><%= tx.payment_method %></td>
+        <td><%= tx.note || '-' %></td>
+        <td>
+          <% if (tx.is_cancelled) { %>
+            <div class="cancelled">Cancelled</div>
+            <div class="muted"><%= tx.cancelled_at %> - <%= tx.cancel_reason %></div>
+          <% } else { %>
+            <span>Active</span>
+          <% } %>
+        </td>
+        <td>
+          <% if (!tx.is_cancelled) { %>
+            <form class="inline" method="post" action="/finance/<%= tx.id %>/cancel">
+              <input type="text" name="cancel_reason" placeholder="Cancel reason" required>
+              <button type="submit">Cancel</button>
+            </form>
+          <% } else { %>
+            -
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../_footer') %>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    nav a { margin-right: 12px; }
+    .cancelled { color: #9b1c1c; font-weight: bold; }
+    .errors { background: #fee; border: 1px solid #f99; padding: 10px; margin: 10px 0; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+    form.inline { display: inline; }
+    .muted { color: #666; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/finance">Finance</a>
+    <span class="muted">Role: <%= currentUser.role %></span>
+    <span class="muted">(switch: ?role=admin|staff|patron)</span>
+  </nav>
+  <hr>
