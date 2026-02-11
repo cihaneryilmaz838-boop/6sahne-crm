@@ -1,38 +1,27 @@
-const ROLES = {
-  PATRON: 1,
-  STAFF: 2,
-  ADMIN: 3,
-};
+const { AppError } = require('./errors');
 
-function normalizeRole(raw) {
-  const normalized = String(raw || '').trim().toUpperCase();
-  if (normalized === 'ADMIN' || normalized === 'STAFF' || normalized === 'PATRON') {
-    return normalized;
+const ROLES = Object.freeze({
+  PATRON: 'Patron',
+  STAFF: 'Staff',
+  ADMIN: 'Admin',
+});
+
+function requireAuth(req, res, next) {
+  if (!req.session || !req.session.user) {
+    return next(new AppError('Unauthorized', 401));
   }
-  return 'STAFF';
+  req.user = req.session.user;
+  return next();
 }
 
-function attachCurrentUser(req, res, next) {
-  const role = normalizeRole(req.query.role || req.headers['x-user-role']);
-  const idByRole = { ADMIN: 1, STAFF: 2, PATRON: 3 };
-
-  req.currentUser = {
-    id: idByRole[role],
-    username: role.toLowerCase(),
-    role,
-  };
-
-  res.locals.currentUser = req.currentUser;
-  next();
-}
-
-function requireRole(minRole) {
+function requireRole(...allowedRoles) {
   return (req, res, next) => {
-    const userRoleRank = ROLES[req.currentUser.role] || 0;
-    const minRoleRank = ROLES[minRole] || Number.MAX_SAFE_INTEGER;
+    if (!req.user) {
+      return next(new AppError('Unauthorized', 401));
+    }
 
-    if (userRoleRank < minRoleRank) {
-      return res.status(403).send('<h1>403 Forbidden</h1><p>You do not have permission for this page.</p>');
+    if (!allowedRoles.includes(req.user.role)) {
+      return next(new AppError('Forbidden', 403));
     }
 
     return next();
@@ -40,7 +29,7 @@ function requireRole(minRole) {
 }
 
 module.exports = {
-  attachCurrentUser,
-  requireRole,
   ROLES,
+  requireAuth,
+  requireRole,
 };

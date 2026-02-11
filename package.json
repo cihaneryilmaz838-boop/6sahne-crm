@@ -1,14 +1,17 @@
 {
   "name": "6sahne-crm",
-  "version": "1.0.0",
-  "description": "Offline LAN CRM system for 6Sahne Arts Center",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline/LAN CRM skeleton for 6Sahne",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "node app.js",
+    "check": "node --check app.js"
   },
   "dependencies": {
-    "better-sqlite3": "^9.4.3",
-    "ejs": "^3.1.10",
-    "express": "^4.19.2"
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
   }
 }
