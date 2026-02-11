@@ -1,0 +1,24 @@
+<%- include('../_header', { title }) %>
+<h1>Finance Categories (Admin)</h1>
+<p><a href="/finance/categories/new">+ New Category</a> | <a href="/finance">Back to ledger</a></p>
+
+<table>
+  <thead>
+    <tr><th>ID</th><th>Name</th><th>Direction</th><th>Parent ID</th><th>Active</th></tr>
+  </thead>
+  <tbody>
+    <% if (categories.length === 0) { %>
+      <tr><td colspan="5">No categories.</td></tr>
+    <% } %>
+    <% categories.forEach((c) => { %>
+      <tr>
+        <td><%= c.id %></td>
+        <td><%= c.name %></td>
+        <td><%= c.direction %></td>
+        <td><%= c.parent_id || '-' %></td>
+        <td><%= c.is_active ? 'Yes' : 'No' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('../_footer') %>

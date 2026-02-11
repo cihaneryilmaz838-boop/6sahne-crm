@@ -1,0 +1,57 @@
+<%- include('../_header', { title }) %>
+<h1>New Finance Transaction</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/finance">
+  <p>
+    <label>Direction
+      <select name="direction" required>
+        <option value="">Select</option>
+        <% directionValues.forEach((d) => { %>
+          <option value="<%= d %>" <%= form.direction === d ? 'selected' : '' %>><%= d %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p><label>Amount (kuruş) <input name="amount" type="number" min="1" required value="<%= form.amount %>"></label></p>
+  <p><label>Currency <input name="currency" value="<%= form.currency || 'TRY' %>" required></label></p>
+  <p><label>Date <input name="date" type="date" required value="<%= form.date %>"></label></p>
+  <p>
+    <label>Category
+      <select name="category_id" required>
+        <option value="">Select</option>
+        <% categories.forEach((c) => { %>
+          <option value="<%= c.id %>" <%= String(form.category_id) === String(c.id) ? 'selected' : '' %>>
+            <%= c.direction %> - <%= c.name %>
+          </option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p>
+    <label>Payment method
+      <select name="payment_method" required>
+        <option value="">Select</option>
+        <% paymentMethodValues.forEach((p) => { %>
+          <option value="<%= p %>" <%= form.payment_method === p ? 'selected' : '' %>><%= p %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p><label>Note <input name="note" value="<%= form.note %>"></label></p>
+  <p><label>Reference Type <input name="ref_type" value="<%= form.ref_type %>"></label></p>
+  <p><label>Reference ID <input name="ref_id" type="number" value="<%= form.ref_id %>"></label></p>
+
+  <button type="submit">Create Transaction</button>
+</form>
+
+<p><a href="/finance">Back to ledger</a></p>
+<%- include('../_footer') %>

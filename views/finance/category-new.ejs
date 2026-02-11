@@ -1,0 +1,42 @@
+<%- include('../_header', { title }) %>
+<h1>New Category</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/finance/categories">
+  <p><label>Name <input name="name" required value="<%= form.name %>"></label></p>
+  <p>
+    <label>Direction
+      <select name="direction" required>
+        <option value="">Select</option>
+        <% directionValues.forEach((d) => { %>
+          <option value="<%= d %>" <%= form.direction === d ? 'selected' : '' %>><%= d %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p>
+    <label>Parent Category
+      <select name="parent_id">
+        <option value="">None</option>
+        <% categories.forEach((c) => { %>
+          <option value="<%= c.id %>" <%= String(form.parent_id) === String(c.id) ? 'selected' : '' %>>
+            <%= c.direction %> - <%= c.name %>
+          </option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+
+  <button type="submit">Create Category</button>
+</form>
+
+<p><a href="/finance/categories">Back to categories</a></p>
+<%- include('../_footer') %>
