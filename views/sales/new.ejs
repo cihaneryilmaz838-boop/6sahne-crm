@@ -1,0 +1,80 @@
+<%- include('../_header', { title }) %>
+
+<h1>New Sale</h1>
+
+<% if (savedSaleId) { %>
+  <p><strong>Sale #<%= savedSaleId %> created successfully.</strong></p>
+<% } %>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <ul>
+      <% errors.forEach((error) => { %>
+        <li><%= error %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/sales">
+  <p>
+    <label>Book</label><br>
+    <select name="book_id" required>
+      <option value="">Select book</option>
+      <% books.forEach((book) => { %>
+        <option value="<%= book.id %>" <%= String(form.book_id) === String(book.id) ? 'selected' : '' %>>
+          <%= book.title %> (default price: <%= book.unit_price %>)
+        </option>
+      <% }) %>
+    </select>
+  </p>
+
+  <p>
+    <label>Location</label><br>
+    <select name="location_id" required>
+      <option value="">Select location</option>
+      <% locations.forEach((location) => { %>
+        <option value="<%= location.id %>" <%= String(form.location_id) === String(location.id) ? 'selected' : '' %>>
+          <%= location.name %>
+        </option>
+      <% }) %>
+    </select>
+  </p>
+
+  <p>
+    <label>Quantity</label><br>
+    <input type="number" name="quantity" min="1" step="1" value="<%= form.quantity || '' %>" required>
+  </p>
+
+  <p>
+    <label>Unit price (kuruş)</label><br>
+    <input type="number" name="unit_price" min="1" step="1" value="<%= form.unit_price || '' %>" required>
+  </p>
+
+  <p>
+    <label>Payment method</label><br>
+    <select name="payment_method" required>
+      <% paymentMethods.forEach((method) => { %>
+        <option value="<%= method %>" <%= String(form.payment_method) === String(method) ? 'selected' : '' %>>
+          <%= method %>
+        </option>
+      <% }) %>
+    </select>
+  </p>
+
+  <p>
+    <label>Finance category (income)</label><br>
+    <select name="category_id" required>
+      <option value="">Select category</option>
+      <% categories.forEach((category) => { %>
+        <option value="<%= category.id %>" <%= String(form.category_id) === String(category.id) ? 'selected' : '' %>>
+          <%= category.name %>
+        </option>
+      <% }) %>
+    </select>
+  </p>
+
+  <button type="submit">Create Sale</button>
+</form>
+
+<%- include('../_footer') %>
