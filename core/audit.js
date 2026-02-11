@@ -1,4 +1,4 @@
-const { db } = require('../db');
+const db = require('./db');
 
 const insertAuditStmt = db.prepare(`
   INSERT INTO audit_log (
@@ -18,7 +18,7 @@ const insertAuditStmt = db.prepare(`
   )
 `);
 
-function logAudit({ actionType, actorUserId = null, entityType, entityId = null, reason = null, payload = null }) {
+function writeAuditLog({ actionType, actorUserId = null, entityType, entityId = null, reason = null, payload = null }) {
   insertAuditStmt.run({
     action_type: actionType,
     actor_user_id: actorUserId,
@@ -30,5 +30,6 @@ function logAudit({ actionType, actorUserId = null, entityType, entityId = null,
 }
 
 module.exports = {
-  logAudit,
+  writeAuditLog,
+  logAudit: writeAuditLog,
 };

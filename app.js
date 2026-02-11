@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 
-require('./db');
+require('./core/db');
 const { ROLES, requireAuth, requireRole } = require('./core/auth');
 const { errorHandler, notFoundHandler } = require('./core/errors');
 
@@ -14,6 +14,9 @@ const reportsRoutes = require('./modules/reports/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.set('view engine', 'ejs');
+app.set('views', require('path').join(__dirname, 'views'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -32,6 +35,11 @@ app.use(
     },
   })
 );
+
+app.use((req, res, next) => {
+  res.locals.currentUser = (req.session && req.session.user) || null;
+  next();
+});
 
 // Temporary login helper for skeleton phase only.
 app.get('/login-as/:role', (req, res) => {

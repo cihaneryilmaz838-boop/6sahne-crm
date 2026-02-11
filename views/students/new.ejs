@@ -1,0 +1,78 @@
+<%- include('../_header', { title }) %>
+
+<h1>New Student</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/students">
+  <h2>Student</h2>
+  <p><label>Full name <input name="full_name" required value="<%= form.full_name %>"></label></p>
+  <p><label>Birth date <input type="date" name="birth_date" value="<%= form.birth_date %>"></label></p>
+  <p><label>School <input name="school" value="<%= form.school %>"></label></p>
+  <p>
+    <label>Status
+      <select name="status" required>
+        <% statuses.forEach((status) => { %>
+          <option value="<%= status %>" <%= form.status === status ? 'selected' : '' %>><%= status %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p><label>First registration date <input type="date" name="first_registration_date" required value="<%= form.first_registration_date %>"></label></p>
+
+  <h2>Guardians / Contact</h2>
+  <p><label>Guardian 1 name <input name="guardian1_name" value="<%= form.guardian1_name %>"></label></p>
+  <p><label>Guardian 1 phone <input name="guardian1_phone" required value="<%= form.guardian1_phone %>"></label></p>
+  <p><label>Guardian 2 name <input name="guardian2_name" value="<%= form.guardian2_name %>"></label></p>
+  <p><label>Guardian 2 phone <input name="guardian2_phone" value="<%= form.guardian2_phone %>"></label></p>
+  <p><label>Invoice address <input name="invoice_address" value="<%= form.invoice_address %>"></label></p>
+  <p>
+    <label>Contact preference
+      <select name="contact_preference">
+        <option value="">Select</option>
+        <% contactPreferences.forEach((preference) => { %>
+          <option value="<%= preference %>" <%= form.contact_preference === preference ? 'selected' : '' %>><%= preference %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+
+  <h2>Courses</h2>
+  <p><label>Course tags (comma separated) <input name="course_names" value="<%= form.course_names %>"></label></p>
+
+  <h2>Operational notes</h2>
+  <p><label>Talent notes <input name="talent_notes" value="<%= form.talent_notes %>"></label></p>
+  <p><label>Sports <input name="sports" value="<%= form.sports %>"></label></p>
+  <p><label>Allergy notes <input name="allergy_notes" value="<%= form.allergy_notes %>"></label></p>
+  <p><label>Health notes <input name="health_notes" value="<%= form.health_notes %>"></label></p>
+  <p><label>Meal preference <input name="meal_preference" value="<%= form.meal_preference %>"></label></p>
+
+  <h2>Payment plan</h2>
+  <p><label>Total fee (kuruş) <input type="number" min="0" name="total_fee" required value="<%= form.total_fee %>"></label></p>
+  <p>
+    <label>Plan type
+      <select name="plan_type" required>
+        <% planTypes.forEach((type) => { %>
+          <option value="<%= type %>" <%= form.plan_type === type ? 'selected' : '' %>><%= type %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p><label>Installment due date #1 <input type="date" name="installment_due_date_1" value="<%= form.installment_due_date_1 %>"></label></p>
+  <p><label>Installment due date #2 <input type="date" name="installment_due_date_2" value="<%= form.installment_due_date_2 %>"></label></p>
+  <p><label>Installment due date #3 <input type="date" name="installment_due_date_3" value="<%= form.installment_due_date_3 %>"></label></p>
+  <p><label>Installment due date #4 <input type="date" name="installment_due_date_4" value="<%= form.installment_due_date_4 %>"></label></p>
+
+  <button type="submit">Create Student</button>
+</form>
+
+<p><a href="/students">Back to students</a></p>
+
+<%- include('../_footer') %>

@@ -1,11 +1,11 @@
 const express = require('express');
 const repo = require('./repo');
 const service = require('./service');
-const { requireRole } = require('../../core/auth');
+const { ROLES, requireRole } = require('../../core/auth');
 
 const router = express.Router();
 
-router.use(requireRole('STAFF'));
+router.use(requireRole(ROLES.STAFF, ROLES.ADMIN));
 
 router.get('/', (req, res) => {
   const filters = {
@@ -55,7 +55,7 @@ router.get('/new', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const result = service.createTransaction(req.body, req.currentUser);
+  const result = service.createTransaction(req.body, req.user);
 
   if (result.errors) {
     return res.status(422).render('finance/new', {
@@ -72,7 +72,7 @@ router.post('/', (req, res) => {
 });
 
 router.post('/:id/cancel', (req, res) => {
-  const result = service.cancelTransaction(Number(req.params.id), req.body.cancel_reason, req.currentUser);
+  const result = service.cancelTransaction(Number(req.params.id), req.body.cancel_reason, req.user);
 
   if (result.errors) {
     const filters = {
@@ -98,7 +98,7 @@ router.post('/:id/cancel', (req, res) => {
   return res.redirect('/finance?include_cancelled=1');
 });
 
-router.get('/categories', requireRole('ADMIN'), (req, res) => {
+router.get('/categories', requireRole(ROLES.ADMIN), (req, res) => {
   return res.render('finance/categories', {
     title: 'Finance Categories',
     categories: repo.listCategories({ includeInactive: true }),
@@ -106,7 +106,7 @@ router.get('/categories', requireRole('ADMIN'), (req, res) => {
   });
 });
 
-router.get('/categories/new', requireRole('ADMIN'), (req, res) => {
+router.get('/categories/new', requireRole(ROLES.ADMIN), (req, res) => {
   return res.render('finance/category-new', {
     title: 'New Category',
     categories: repo.listCategories({ includeInactive: true }),
@@ -120,8 +120,8 @@ router.get('/categories/new', requireRole('ADMIN'), (req, res) => {
   });
 });
 
-router.post('/categories', requireRole('ADMIN'), (req, res) => {
-  const result = service.createCategory(req.body, req.currentUser);
+router.post('/categories', requireRole(ROLES.ADMIN), (req, res) => {
+  const result = service.createCategory(req.body, req.user);
 
   if (result.errors) {
     return res.status(422).render('finance/category-new', {
