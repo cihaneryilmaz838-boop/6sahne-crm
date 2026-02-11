@@ -1,0 +1,43 @@
+<%- include('../_header', { title }) %>
+
+<h1>Locations</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/inventory/locations">
+  <label>Name <input type="text" name="name" required value="<%= form.name || '' %>" placeholder="DEPO"></label>
+  <button type="submit">Add Location</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Created At</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (locations.length === 0) { %>
+      <tr><td colspan="3">No locations defined.</td></tr>
+    <% } %>
+    <% locations.forEach((location) => { %>
+      <tr>
+        <td><%= location.id %></td>
+        <td><%= location.name %></td>
+        <td><%= location.created_at %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<p><a href="/inventory">Back to inventory</a></p>
+
+<%- include('../_footer') %>
