@@ -1,4 +1,18 @@
-// Service layer placeholder for module business rules.
-// NOTE: No hard delete policy applies globally; use cancellation with reason + audit logging.
+const repo = require('./repo');
 
-module.exports = {};
+function getDashboardData() {
+  const today = new Date().toISOString().slice(0, 10);
+  const monthPrefix = today.slice(0, 7);
+
+  return {
+    generatedAt: today,
+    financeSummary: repo.getFinanceSummary({ today, monthPrefix }),
+    studentBalances: repo.listStudentBalancesWithRemaining(),
+    bookStockSummary: repo.listBookStockSummary(),
+    recentSales: repo.listRecentSales(20),
+  };
+}
+
+module.exports = {
+  getDashboardData,
+};
