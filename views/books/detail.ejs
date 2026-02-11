@@ -1,0 +1,35 @@
+<%- include('../_header', { title }) %>
+
+<h1>Book #<%= book.id %></h1>
+
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/books/<%= book.id %>">
+  <p><label>Title <input name="title" required value="<%= book.title %>"></label></p>
+  <p><label>Author <input name="author" value="<%= book.author || '' %>"></label></p>
+  <p><label>Publisher <input name="publisher" value="<%= book.publisher || '' %>"></label></p>
+  <p><label>ISBN <input name="isbn" value="<%= book.isbn || '' %>"></label></p>
+  <p><label>Unit price (kuruş) <input type="number" min="0" step="1" name="unit_price" required value="<%= book.unit_price %>"></label></p>
+
+  <p>
+    <label>Active
+      <select name="is_active">
+        <option value="1" <%= String(book.is_active) === '1' || Number(book.is_active) === 1 ? 'selected' : '' %>>Yes</option>
+        <option value="0" <%= String(book.is_active) === '0' || Number(book.is_active) === 0 ? 'selected' : '' %>>No</option>
+      </select>
+    </label>
+  </p>
+
+  <button type="submit">Save Changes</button>
+</form>
+
+<p><a href="/books">Back to books</a></p>
+
+<%- include('../_footer') %>

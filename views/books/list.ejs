@@ -1,0 +1,43 @@
+<%- include('../_header', { title }) %>
+
+<h1>Books</h1>
+<p><a href="/books/new">+ New Book</a></p>
+
+<form method="get" action="/books">
+  <label>Search by title/author
+    <input type="text" name="search" value="<%= search %>" placeholder="Title or author">
+  </label>
+  <button type="submit">Search</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Publisher</th>
+      <th>ISBN</th>
+      <th>Unit Price (kuruş)</th>
+      <th>Active</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (books.length === 0) { %>
+      <tr><td colspan="7">No books found.</td></tr>
+    <% } %>
+    <% books.forEach((book) => { %>
+      <tr>
+        <td><a href="/books/<%= book.id %>"><%= book.id %></a></td>
+        <td><a href="/books/<%= book.id %>"><%= book.title %></a></td>
+        <td><%= book.author || '-' %></td>
+        <td><%= book.publisher || '-' %></td>
+        <td><%= book.isbn || '-' %></td>
+        <td><%= book.unit_price %></td>
+        <td><%= book.is_active ? 'Yes' : 'No' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../_footer') %>
