@@ -1,0 +1,156 @@
+<%- include('../_header', { title }) %>
+
+<h1><%= detail.student.full_name %> (#<%= detail.student.id %>)</h1>
+<p>Status: <strong><%= detail.student.status %></strong></p>
+
+<h2>Profile</h2>
+<ul>
+  <li>Birth date: <%= detail.student.birth_date || '-' %></li>
+  <li>School: <%= detail.student.school || '-' %></li>
+  <li>First registration: <%= detail.student.first_registration_date %></li>
+</ul>
+
+<h2>Guardians / Contact</h2>
+<ul>
+  <li>Guardian 1: <%= detail.student.guardian1_name || '-' %> / <%= detail.student.guardian1_phone %></li>
+  <li>Guardian 2: <%= detail.student.guardian2_name || '-' %> / <%= detail.student.guardian2_phone || '-' %></li>
+  <li>Invoice address: <%= detail.student.invoice_address || '-' %></li>
+  <li>Contact preference: <%= detail.student.contact_preference || '-' %></li>
+</ul>
+
+<h2>Courses</h2>
+<p>
+  <% if (!detail.courses.length) { %>
+    -
+  <% } else { %>
+    <%= detail.courses.map((c) => c.course_name).join(', ') %>
+  <% } %>
+</p>
+
+<h2>Notes</h2>
+<ul>
+  <li>Talent: <%= detail.student.talent_notes || '-' %></li>
+  <li>Sports: <%= detail.student.sports || '-' %></li>
+  <li>Allergy: <%= detail.student.allergy_notes || '-' %></li>
+  <li>Health: <%= detail.student.health_notes || '-' %></li>
+  <li>Meal preference: <%= detail.student.meal_preference || '-' %></li>
+</ul>
+
+<h2>Payment Plan Summary</h2>
+<p>Total fee: <strong><%= detail.summary.totalFee %></strong> kuruş</p>
+<p>Paid amount: <strong><%= detail.summary.paidAmount %></strong> kuruş</p>
+<p>Remaining: <strong><%= detail.summary.remaining %></strong> kuruş
+  <% if (detail.summary.isOverpaid) { %>
+    <span class="cancelled">(Overpaid)</span>
+  <% } %>
+</p>
+<% if (detail.paymentPlan) { %>
+  <p>Plan type: <%= detail.paymentPlan.plan_type %></p>
+<% } %>
+
+<h3>Installment Schedule</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Order</th>
+      <th>Due Date</th>
+      <th>Expected (kuruş)</th>
+      <th>Covered</th>
+      <th>Unpaid</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (!detail.installmentSchedule.length) { %>
+      <tr><td colspan="6">No installment schedule.</td></tr>
+    <% } %>
+    <% detail.installmentSchedule.forEach((inst) => { %>
+      <tr>
+        <td><%= inst.installment_order %></td>
+        <td><%= inst.due_date %></td>
+        <td><%= inst.installmentAmount %></td>
+        <td><%= inst.coveredAmount %></td>
+        <td><%= inst.unpaidAmount %></td>
+        <td>
+          <% if (inst.isOverdue) { %>
+            <span class="cancelled">OVERDUE</span>
+          <% } else if (inst.unpaidAmount > 0) { %>
+            Pending
+          <% } else { %>
+            Paid
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h3>Payment History</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Amount</th>
+      <th>Category</th>
+      <th>Method</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (!detail.payments.length) { %>
+      <tr><td colspan="5">No payments yet.</td></tr>
+    <% } %>
+    <% detail.payments.forEach((tx) => { %>
+      <tr>
+        <td><%= tx.date %></td>
+        <td><%= tx.amount %></td>
+        <td><%= tx.category_name %></td>
+        <td><%= tx.payment_method %></td>
+        <td><%= tx.note || '-' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2>Add Payment</h2>
+<% if (errors && errors.length) { %>
+  <div class="errors">
+    <strong>Validation errors:</strong>
+    <ul>
+      <% errors.forEach((err) => { %><li><%= err %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post" action="/students/<%= detail.student.id %>/payment">
+  <p><label>Amount (kuruş) <input type="number" min="1" name="amount" required value="<%= paymentForm.amount %>"></label></p>
+  <p><label>Date <input type="date" name="date" required value="<%= paymentForm.date %>"></label></p>
+  <p>
+    <label>Category
+      <select name="category_id" required>
+        <option value="">Select</option>
+        <% categories.forEach((category) => { %>
+          <option value="<%= category.id %>" <%= String(paymentForm.category_id) === String(category.id) ? 'selected' : '' %>>
+            <%= category.name %>
+          </option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p>
+    <label>Payment method
+      <select name="payment_method" required>
+        <option value="">Select</option>
+        <% paymentMethods.forEach((method) => { %>
+          <option value="<%= method %>" <%= paymentForm.payment_method === method ? 'selected' : '' %>><%= method %></option>
+        <% }) %>
+      </select>
+    </label>
+  </p>
+  <p><label>Note <input name="note" value="<%= paymentForm.note %>"></label></p>
+  <button type="submit">Record Payment</button>
+</form>
+
+<p><a href="/students">Back to students</a></p>
+
+<%- include('../_footer') %>

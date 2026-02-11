@@ -1,0 +1,41 @@
+<%- include('../_header', { title }) %>
+
+<h1>Students</h1>
+<p><a href="/students/new">+ New Student</a></p>
+
+<form method="get" action="/students">
+  <label>Search by name/phone
+    <input type="text" name="search" value="<%= search %>" placeholder="Name or phone">
+  </label>
+  <button type="submit">Search</button>
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Guardian 1</th>
+      <th>Guardian 2</th>
+      <th>First Registration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (students.length === 0) { %>
+      <tr><td colspan="6">No students found.</td></tr>
+    <% } %>
+    <% students.forEach((student) => { %>
+      <tr>
+        <td><a href="/students/<%= student.id %>"><%= student.id %></a></td>
+        <td><a href="/students/<%= student.id %>"><%= student.full_name %></a></td>
+        <td><%= student.status %></td>
+        <td><%= student.guardian1_phone %></td>
+        <td><%= student.guardian2_phone || '-' %></td>
+        <td><%= student.first_registration_date %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../_footer') %>

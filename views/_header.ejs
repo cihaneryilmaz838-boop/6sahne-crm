@@ -18,8 +18,10 @@
 <body>
   <nav>
     <a href="/">Home</a>
+    <a href="/students">Students</a>
     <a href="/finance">Finance</a>
-    <span class="muted">Role: <%= currentUser.role %></span>
-    <span class="muted">(switch: ?role=admin|staff|patron)</span>
+    <% if (currentUser) { %>
+      <span class="muted">Role: <%= currentUser.role %></span>
+    <% } %>
   </nav>
   <hr>
