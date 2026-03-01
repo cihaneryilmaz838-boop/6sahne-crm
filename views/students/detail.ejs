@@ -37,15 +37,20 @@
 </ul>
 
 <h2>Payment Plan Summary</h2>
-<p>Total fee: <strong><%= detail.summary.totalFee %></strong> kuruş</p>
-<p>Paid amount: <strong><%= detail.summary.paidAmount %></strong> kuruş</p>
-<p>Remaining: <strong><%= detail.summary.remaining %></strong> kuruş
-  <% if (detail.summary.isOverpaid) { %>
-    <span class="cancelled">(Overpaid)</span>
-  <% } %>
-</p>
+<%
+const overdueInstallments = detail.installmentSchedule.filter((inst) => inst.isOverdue).length;
+%>
+<div class="kpi-grid">
+  <div class="kpi"><p class="label">Total fee</p><p class="value"><%= detail.summary.totalFee %> kuruş</p></div>
+  <div class="kpi"><p class="label">Paid</p><p class="value"><%= detail.summary.paidAmount %> kuruş</p></div>
+  <div class="kpi"><p class="label">Remaining</p><p class="value"><%= detail.summary.remaining %> kuruş</p></div>
+  <div class="kpi"><p class="label">Overdue installments</p><p class="value"><%= overdueInstallments %></p></div>
+</div>
+<% if (detail.summary.isOverpaid) { %>
+  <p><span class="status-badge status-cancelled">Overpaid</span></p>
+<% } %>
 <% if (detail.paymentPlan) { %>
-  <p>Plan type: <%= detail.paymentPlan.plan_type %></p>
+  <p>Plan type: <strong><%= detail.paymentPlan.plan_type %></strong></p>
 <% } %>
 
 <h3>Installment Schedule</h3>

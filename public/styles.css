@@ -1,0 +1,87 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #1f2937;
+  background: #f6f8fb;
+}
+
+.site-header,
+.site-nav,
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 18px;
+}
+
+.app-name {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.site-nav {
+  margin-top: 12px;
+  margin-bottom: 18px;
+  border-top: 1px solid #dbe2ea;
+  border-bottom: 1px solid #dbe2ea;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #1f2937;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.nav-link.active {
+  background: #e6eef8;
+  font-weight: 600;
+}
+
+.page-container { padding-bottom: 24px; }
+h1 { margin-top: 0; }
+
+table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 12px; }
+th, td { border: 1px solid #dbe2ea; padding: 8px; text-align: left; vertical-align: top; }
+tr:nth-child(even) { background: #f8fbff; }
+
+form { margin: 12px 0; }
+label { display: inline-block; margin: 6px 14px 6px 0; font-weight: 600; }
+input, select, button, textarea { margin-top: 4px; padding: 6px 8px; }
+button { cursor: pointer; }
+
+.inline { display: inline; }
+.logout-form { margin-left: auto; }
+
+.alert { border: 1px solid; border-radius: 6px; padding: 10px 12px; margin: 10px 0; }
+.alert-error { background: #fff1f1; border-color: #f3b7b7; color: #8d1b1b; }
+.alert-success { background: #eef9ef; border-color: #bce5c0; color: #1f6a2a; }
+
+.cancelled { color: #9b1c1c; font-weight: 700; }
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.85rem; }
+.status-active { background: #ebf7ef; color: #1f6a2a; }
+.status-cancelled { background: #fff1f1; color: #8d1b1b; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 12px 0; }
+.card { background: #fff; border: 1px solid #dbe2ea; border-radius: 8px; padding: 12px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin: 10px 0 14px; }
+.kpi { background: #fff; border: 1px solid #dbe2ea; border-radius: 8px; padding: 10px; }
+.kpi .label { margin: 0; font-size: 0.86rem; color: #6b7280; }
+.kpi .value { margin: 2px 0 0; font-size: 1.1rem; font-weight: 700; }
+
+.filters { background: #fff; border: 1px solid #dbe2ea; border-radius: 8px; padding: 10px; margin-top: 10px; }
+.muted { color: #6b7280; }

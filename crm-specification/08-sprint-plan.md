@@ -1,6 +1,6 @@
 # Sprint Plan (Implementation Order)
 
-Sprint 0: Project skeleton
+Sprint 0: Project bootstrap
 - app bootstrap, routing, db init, sessions, roles
 - audit log infra
 - cancellation standard
@@ -32,3 +32,8 @@ Sprint 5: Reports
 
 Sprint 6: usability polish
 - faster search, recent activity, export CSV
+
+Sprint 11: UI polish + documentation sync
+- unified layout partials, nav and flash patterns
+- dashboard-style home page
+- docs aligned with implemented modules
