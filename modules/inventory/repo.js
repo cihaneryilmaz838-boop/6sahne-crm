@@ -1,4 +1,5 @@
 const db = require('../../core/db');
+const { writeAuditLog } = require('../../core/audit');
 
 function listBooks() {
   return db
@@ -84,6 +85,7 @@ function createMovement(payload) {
     .prepare(
       `INSERT INTO inventory_movements (
         book_id,
+        movement_type,
         from_location_id,
         to_location_id,
         quantity,
@@ -91,6 +93,7 @@ function createMovement(payload) {
         created_by
       ) VALUES (
         @book_id,
+        @movement_type,
         @from_location_id,
         @to_location_id,
         @quantity,
@@ -117,7 +120,72 @@ function moveStock(payload) {
       updateStockQuantity(movement.book_id, movement.to_location_id, toStock.quantity + movement.quantity);
     }
 
-    return createMovement(movement);
+    return createMovement({
+      ...movement,
+      movement_type: 'MOVE',
+    });
+  });
+
+  return tx(payload);
+}
+
+function adjustStockTx(payload) {
+  const tx = db.transaction((movement) => {
+    ensureStockRow(movement.book_id, movement.location_id);
+
+    const stock = getStockRow(movement.book_id, movement.location_id);
+    const stockBefore = stock ? stock.quantity : 0;
+
+    let stockAfter = stockBefore;
+    let movementType = 'ADJUST_IN';
+    let fromLocationId = null;
+    let toLocationId = movement.location_id;
+
+    if (movement.direction === 'OUT') {
+      stockAfter = stockBefore - movement.quantity;
+      movementType = 'ADJUST_OUT';
+      fromLocationId = movement.location_id;
+      toLocationId = null;
+
+      if (stockAfter < 0) {
+        throw new Error('INSUFFICIENT_STOCK');
+      }
+    } else {
+      stockAfter = stockBefore + movement.quantity;
+    }
+
+    updateStockQuantity(movement.book_id, movement.location_id, stockAfter);
+
+    const movementId = createMovement({
+      book_id: movement.book_id,
+      movement_type: movementType,
+      from_location_id: fromLocationId,
+      to_location_id: toLocationId,
+      quantity: movement.quantity,
+      note: movement.note,
+      created_by: movement.created_by,
+    });
+
+    writeAuditLog({
+      actionType: 'CREATE',
+      actorUserId: movement.created_by,
+      entityType: 'stock_adjust',
+      entityId: movementId,
+      payload: {
+        book_id: movement.book_id,
+        location_id: movement.location_id,
+        direction: movement.direction,
+        quantity: movement.quantity,
+        note: movement.note,
+      },
+    });
+
+    return {
+      movementId,
+      stockBefore,
+      stockAfter,
+      movementType,
+    };
   });
 
   return tx(payload);
@@ -134,4 +202,5 @@ module.exports = {
   getStockRow,
   ensureStockRow,
   moveStock,
+  adjustStockTx,
 };
