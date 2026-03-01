@@ -10,6 +10,11 @@ function normalizeRole(role) {
   return String(role || '').toUpperCase();
 }
 
+function attachCurrentUser(req, res, next) {
+  res.locals.currentUser = (req.session && req.session.user) || null;
+  next();
+}
+
 function requireAuth(req, res, next) {
   if (!req.session || !req.session.user) {
     return next(new AppError('Unauthorized', 401));
@@ -42,6 +47,7 @@ function requireRole(...allowedRoles) {
 
 module.exports = {
   ROLES,
+  attachCurrentUser,
   requireAuth,
   requireRole,
 };
