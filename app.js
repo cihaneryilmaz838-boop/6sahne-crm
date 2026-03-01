@@ -1,8 +1,10 @@
 const express = require('express');
 const session = require('express-session');
 
-require('./core/db');
-const { ROLES, requireAuth, requireRole } = require('./core/auth');
+const db = require('./core/db');
+const { hashPassword, verifyPassword } = require('./core/password');
+const { writeAuditLog } = require('./core/audit');
+const { ROLES, attachCurrentUser, requireAuth, requireRole } = require('./core/auth');
 const { attachCsrfToken, requireCsrf } = require('./core/csrf');
 const { errorHandler, notFoundHandler } = require('./core/errors');
 
@@ -16,6 +18,27 @@ const reportsRoutes = require('./modules/reports/routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
+
+const findActiveUserByUsernameStmt = db.prepare(`
+  SELECT id, username, role, password_hash, password_salt
+  FROM users
+  WHERE username = ? AND is_active = 1
+  LIMIT 1
+`);
+
+const findUserCredentialsByIdStmt = db.prepare(`
+  SELECT id, password_hash, password_salt
+  FROM users
+  WHERE id = ? AND is_active = 1
+  LIMIT 1
+`);
+
+const updateUserPasswordStmt = db.prepare(`
+  UPDATE users
+  SET password_hash = @password_hash,
+      password_salt = @password_salt
+  WHERE id = @id
+`);
 
 if (isProduction && !process.env.SESSION_SECRET) {
   throw new Error('SESSION_SECRET is required in production. Please set a strong SESSION_SECRET environment variable.');
@@ -47,13 +70,55 @@ app.use(
 );
 
 app.use(attachCsrfToken);
+app.use(attachCurrentUser);
+app.use(requireCsrf);
 
-app.use((req, res, next) => {
-  res.locals.currentUser = (req.session && req.session.user) || null;
-  next();
+app.get('/login', (req, res) => {
+  if (req.session && req.session.user) {
+    return res.redirect('/reports');
+  }
+
+  return res.render('login', {
+    title: 'Login',
+    error: null,
+    form: { username: '' },
+  });
 });
 
-app.use(requireCsrf);
+app.post('/login', (req, res) => {
+  const username = String(req.body.username || '').trim();
+  const password = String(req.body.password || '');
+
+  if (!username || !password) {
+    return res.status(422).render('login', {
+      title: 'Login',
+      error: 'Invalid username or password.',
+      form: { username },
+    });
+  }
+
+  const user = findActiveUserByUsernameStmt.get(username);
+  const validUser = user
+    && user.password_hash
+    && user.password_salt
+    && verifyPassword(password, user.password_salt, user.password_hash);
+
+  if (!validUser) {
+    return res.status(401).render('login', {
+      title: 'Login',
+      error: 'Invalid username or password.',
+      form: { username },
+    });
+  }
+
+  req.session.user = {
+    id: user.id,
+    username: user.username,
+    role: String(user.role || '').toUpperCase(),
+  };
+
+  return res.redirect('/reports');
+});
 
 // Temporary login helper for skeleton phase only.
 app.get('/login-as/:role', (req, res) => {
@@ -81,12 +146,78 @@ app.post('/logout', requireAuth, (req, res, next) => {
       return next(err);
     }
     res.clearCookie('crm.sid');
-    return res.send('Logged out');
+    return res.redirect('/login');
+  });
+});
+
+app.get('/account/password', requireAuth, (req, res) => {
+  return res.render('account/password', {
+    title: 'Change Password',
+    errors: [],
+    successMessage: null,
+  });
+});
+
+app.post('/account/password', requireAuth, (req, res) => {
+  const currentPassword = String(req.body.current_password || '');
+  const newPassword = String(req.body.new_password || '');
+  const confirmNewPassword = String(req.body.confirm_new_password || '');
+  const errors = [];
+
+  if (!currentPassword) {
+    errors.push('Current password is required.');
+  }
+  if (!newPassword) {
+    errors.push('New password is required.');
+  }
+  if (newPassword.length < 8) {
+    errors.push('New password must be at least 8 characters.');
+  }
+  if (newPassword !== confirmNewPassword) {
+    errors.push('New password and confirmation do not match.');
+  }
+
+  const user = findUserCredentialsByIdStmt.get(req.user.id);
+  if (!user || !verifyPassword(currentPassword, user.password_salt, user.password_hash)) {
+    errors.push('Current password is incorrect.');
+  }
+
+  if (errors.length > 0) {
+    return res.status(422).render('account/password', {
+      title: 'Change Password',
+      errors,
+      successMessage: null,
+    });
+  }
+
+  const nextPassword = hashPassword(newPassword);
+  updateUserPasswordStmt.run({
+    id: req.user.id,
+    password_hash: nextPassword.hash,
+    password_salt: nextPassword.salt,
+  });
+
+  writeAuditLog({
+    actionType: 'UPDATE',
+    actorUserId: req.user.id,
+    entityType: 'user',
+    entityId: req.user.id,
+    reason: 'password_change',
+  });
+
+  return res.render('account/password', {
+    title: 'Change Password',
+    errors: [],
+    successMessage: 'Password updated successfully.',
   });
 });
 
 app.get('/', (req, res) => {
-  res.send('6Sahne CRM skeleton is running.');
+  if (!req.session || !req.session.user) {
+    return res.redirect('/login');
+  }
+
+  return res.redirect('/reports');
 });
 
 // Module route loader + role guards.

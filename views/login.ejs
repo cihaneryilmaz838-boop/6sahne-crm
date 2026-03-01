@@ -1,0 +1,21 @@
+<%- include('_header', { title }) %>
+<h1>Login</h1>
+
+<% if (error) { %>
+  <div class="errors"><%= error %></div>
+<% } %>
+
+<p class="muted">Default first-run admin: <strong>admin</strong> / <strong>admin1234</strong>. Change it immediately after login.</p>
+
+<form method="post" action="/login">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+
+  <label for="username">Username</label><br>
+  <input id="username" name="username" type="text" value="<%= form.username %>" autocomplete="username" required><br><br>
+
+  <label for="password">Password</label><br>
+  <input id="password" name="password" type="password" autocomplete="current-password" required><br><br>
+
+  <button type="submit">Login</button>
+</form>
+<%- include('_footer') %>
