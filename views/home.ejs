@@ -1,7 +1,27 @@
 <%- include('_header', { title }) %>
-<h1>6Sahne CRM</h1>
-<p>Use the navigation to manage modules.</p>
-<ul>
-  <li><a href="/finance">Finance Ledger</a></li>
-</ul>
+
+<h1>Dashboard</h1>
+<p class="muted">Welcome back, <strong><%= currentUser.username %></strong>. Select a module to continue.</p>
+
+<section>
+  <h2>Quick Links</h2>
+  <div class="card-grid">
+    <a class="card" href="/finance">Finance</a>
+    <a class="card" href="/students">Students</a>
+    <a class="card" href="/books">Books</a>
+    <a class="card" href="/inventory">Inventory</a>
+    <a class="card" href="/sales">Sales</a>
+    <a class="card" href="/reports">Reports</a>
+  </div>
+</section>
+
+<section>
+  <h2>System Status</h2>
+  <ul>
+    <li>Database file: <code><%= systemStatus.dbFileName %></code></li>
+    <li>Environment: <code><%= systemStatus.nodeEnv %></code></li>
+    <li>Current user: <strong><%= currentUser.username %></strong> (<%= currentUser.role %>)</li>
+  </ul>
+</section>
+
 <%- include('_footer') %>

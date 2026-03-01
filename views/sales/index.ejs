@@ -4,12 +4,6 @@
 
 <p><a href="/sales/new">+ New Sale</a></p>
 
-<% if (flash) { %>
-  <div class="<%= flash.type === 'error' ? 'errors' : 'muted' %>">
-    <%= flash.message %>
-  </div>
-<% } %>
-
 <table>
   <thead>
     <tr>
@@ -33,10 +27,10 @@
         <td><%= sale.id %></td>
         <td>
           <% if (sale.is_cancelled) { %>
-            <div class="cancelled">Cancelled</div>
+            <span class="status-badge status-cancelled">Cancelled</span>
             <div class="muted"><%= sale.cancelled_at %> - <%= sale.cancel_reason %></div>
           <% } else { %>
-            Active
+            <span class="status-badge status-active">Active</span>
           <% } %>
         </td>
         <td><%= sale.book_title %></td>

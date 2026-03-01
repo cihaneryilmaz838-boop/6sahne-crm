@@ -1,0 +1,20 @@
+<nav class="site-nav" aria-label="Main navigation">
+  <% const isActive = (prefixes) => prefixes.some((prefix) => activePath === prefix || activePath.startsWith(`${prefix}/`)); %>
+
+  <% if (!currentUser) { %>
+    <a class="nav-link <%= isActive(['/login']) ? 'active' : '' %>" href="/login">Login</a>
+  <% } else { %>
+    <a class="nav-link <%= isActive(['/']) ? 'active' : '' %>" href="/">Dashboard</a>
+    <a class="nav-link <%= isActive(['/finance']) ? 'active' : '' %>" href="/finance">Finance</a>
+    <a class="nav-link <%= isActive(['/students']) ? 'active' : '' %>" href="/students">Students</a>
+    <a class="nav-link <%= isActive(['/books']) ? 'active' : '' %>" href="/books">Books</a>
+    <a class="nav-link <%= isActive(['/inventory']) ? 'active' : '' %>" href="/inventory">Inventory</a>
+    <a class="nav-link <%= isActive(['/sales']) ? 'active' : '' %>" href="/sales">Sales</a>
+    <a class="nav-link <%= isActive(['/reports']) ? 'active' : '' %>" href="/reports">Reports</a>
+    <a class="nav-link <%= isActive(['/account/password']) ? 'active' : '' %>" href="/account/password">Change Password</a>
+    <form method="post" action="/logout" class="inline logout-form">
+      <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+      <button type="submit">Logout</button>
+    </form>
+  <% } %>
+</nav>

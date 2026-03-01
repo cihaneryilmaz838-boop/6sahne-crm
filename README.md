@@ -1,81 +1,89 @@
 # 6sahne-crm
 
-Offline/LAN CRM skeleton for 6Sahne Arts Center.
+Offline/LAN CRM for 6Sahne Arts Center.
 
-Tech stack (locked):
+Tech stack:
 - Node.js + Express
 - SQLite (WAL enabled)
-- Server-rendered HTML + minimal vanilla JS
+- Server-rendered EJS views + minimal vanilla JS/CSS
 
-## Installation
+## Module status
 
-1. Install Node.js 20+ on your Mac.
-2. Clone this repository.
+All core modules are implemented and connected:
+- **Finance**: ledger, filtering, cancellation, categories (admin).
+- **Students**: student records, payment plans, payment history, overdue visibility.
+- **Books**: book catalog CRUD with active/inactive support.
+- **Inventory**: locations, stock view, stock move, stock adjust.
+- **Sales**: sales creation, list, cancellation with reason.
+- **Reports**: dashboard/report page for finance, students, stock and recent sales.
+
+## How to run (Mac)
+
+1. Install Node.js 20+
+2. Open Terminal in repo root.
 3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Start app:
+   ```bash
+   npm start
+   ```
+5. Open `http://localhost:3000/login`
 
-```bash
-npm install
-```
+## How to run (Windows)
 
-## Run on Mac
+1. Install Node.js 20+
+2. Open **PowerShell** in repo root.
+3. Install dependencies:
+   ```powershell
+   npm install
+   ```
+4. Start app:
+   ```powershell
+   npm start
+   ```
+5. Open `http://localhost:3000/login`
 
-Start the server:
+## Default admin credentials (first run)
 
-```bash
-npm start
-```
-
-Then open:
-- `http://localhost:3000/login`
-
-## Authentication
-
-- Real login is enabled with username + password from the `users` table.
-- Passwords are stored as `password_hash` + `password_salt` using Node `crypto.scryptSync`.
-- Roles are read from DB and normalized as uppercase `ADMIN | STAFF | PATRON`.
-- Session user shape: `{ id, username, role }`.
-
-### First-run admin bootstrap (development/default install)
-
-If the `users` table is empty, migrations seed this default account:
+If `users` table is empty, migrations seed:
 - username: `admin`
 - password: `admin1234`
 - role: `ADMIN`
 
-> ⚠️ Change this password immediately after first login using **Change Password** (`/account/password`).
+> Change this password immediately after first login from **Change Password** (`/account/password`).
 
-## Dev helper
+## Authentication notes
 
-Quick role login for skeleton testing (development only):
-- `GET /login-as/PATRON`
-- `GET /login-as/STAFF`
-- `GET /login-as/ADMIN`
+- Login uses `users` table credentials (`password_hash` + `password_salt`, Node `crypto.scryptSync`).
+- Roles are normalized to uppercase: `ADMIN | STAFF | PATRON`.
+- Session user payload: `{ id, username, role }`.
+- Dev-only helper exists: `/login-as/PATRON|STAFF|ADMIN` (disabled in production).
+
+## Data policy and cancellation rules
+
+- **No hard delete policy**: records are not physically removed.
+- Finance cancellations set cancellation fields and keep history visible.
+- Sales cancellation marks sale and related records as cancelled with a reason.
+- Audit logging is available via `core/audit.js`.
 
 ## Manual smoke test
 
 1. `npm start`
 2. Open `http://localhost:3000/login`
-3. Login with seeded admin (`admin` / `admin1234`)
-4. Verify `/reports` is accessible
-5. Use logout button and confirm redirect to `/login`
+3. Login with seeded admin
+4. Confirm dashboard (`/`) and reports (`/reports`) open
+5. Use logout and verify redirect to `/login`
 
-## Project Structure
+## Project structure
 
 ```text
 .
 ├── app.js
 ├── core/
-│   ├── auth.js
-│   ├── csrf.js
-│   ├── password.js
-│   ├── audit.js
-│   └── errors.js
 ├── migrations/
 ├── modules/
+├── public/
 └── views/
 ```
-
-## Notes
-
-- Global data policy: **No hard delete**. Use cancellation fields and audit logging.
-- `audit_log` is initialized and available through `core/audit.js` for module actions.

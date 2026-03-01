@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
 
@@ -45,10 +46,22 @@ if (isProduction && !process.env.SESSION_SECRET) {
 }
 
 app.set('view engine', 'ejs');
-app.set('views', require('path').join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req, res, next) => {
+  res.locals.activePath = req.path;
+  res.locals.systemStatus = {
+    dbFileName: path.basename(path.join(__dirname, 'crm.sqlite')),
+    nodeEnv: process.env.NODE_ENV || 'development',
+  };
+  next();
+});
 
 if (isProduction) {
   app.set('trust proxy', 1);
@@ -75,7 +88,7 @@ app.use(requireCsrf);
 
 app.get('/login', (req, res) => {
   if (req.session && req.session.user) {
-    return res.redirect('/reports');
+    return res.redirect('/');
   }
 
   return res.render('login', {
@@ -117,7 +130,7 @@ app.post('/login', (req, res) => {
     role: String(user.role || '').toUpperCase(),
   };
 
-  return res.redirect('/reports');
+  return res.redirect('/');
 });
 
 // Temporary login helper for skeleton phase only.
@@ -217,7 +230,9 @@ app.get('/', (req, res) => {
     return res.redirect('/login');
   }
 
-  return res.redirect('/reports');
+  return res.render('home', {
+    title: 'Dashboard',
+  });
 });
 
 // Module route loader + role guards.

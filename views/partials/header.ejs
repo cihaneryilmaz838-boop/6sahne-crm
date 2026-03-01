@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title ? `${title} | 6Sahne CRM` : '6Sahne CRM' %></title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <p class="app-name">6Sahne CRM</p>
+      <p class="muted">Arts Center Operations</p>
+    </div>
+    <% if (currentUser) { %>
+      <div class="user-pill"><strong><%= currentUser.username %></strong> <span class="muted">(<%= currentUser.role %>)</span></div>
+    <% } %>
+  </header>
+
+  <%- include('nav') %>
+
+  <main class="page-container">
+    <%- include('flash') %>
