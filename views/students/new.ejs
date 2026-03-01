@@ -12,6 +12,7 @@
 <% } %>
 
 <form method="post" action="/students">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
   <h2>Student</h2>
   <p><label>Full name <input name="full_name" required value="<%= form.full_name %>"></label></p>
   <p><label>Birth date <input type="date" name="birth_date" value="<%= form.birth_date %>"></label></p>

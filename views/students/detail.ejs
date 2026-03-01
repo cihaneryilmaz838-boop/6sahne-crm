@@ -123,6 +123,7 @@
 <% } %>
 
 <form method="post" action="/students/<%= detail.student.id %>/payment">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
   <p><label>Amount (kuruş) <input type="number" min="1" name="amount" required value="<%= paymentForm.amount %>"></label></p>
   <p><label>Date <input type="date" name="date" required value="<%= paymentForm.date %>"></label></p>
   <p>

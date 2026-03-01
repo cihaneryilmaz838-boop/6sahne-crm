@@ -3,6 +3,7 @@ const session = require('express-session');
 
 require('./core/db');
 const { ROLES, requireAuth, requireRole } = require('./core/auth');
+const { attachCsrfToken, requireCsrf } = require('./core/csrf');
 const { errorHandler, notFoundHandler } = require('./core/errors');
 
 const financeRoutes = require('./modules/finance/routes');
@@ -14,6 +15,11 @@ const reportsRoutes = require('./modules/reports/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction && !process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET is required in production. Please set a strong SESSION_SECRET environment variable.');
+}
 
 app.set('view engine', 'ejs');
 app.set('views', require('path').join(__dirname, 'views'));
@@ -21,40 +27,52 @@ app.set('views', require('path').join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
 app.use(
   session({
     name: 'crm.sid',
-    secret: process.env.SESSION_SECRET || 'change-this-in-production',
+    secret: process.env.SESSION_SECRET || 'change-this-in-development',
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: 1000 * 60 * 60 * 8,
     },
   })
 );
 
+app.use(attachCsrfToken);
+
 app.use((req, res, next) => {
   res.locals.currentUser = (req.session && req.session.user) || null;
   next();
 });
 
+app.use(requireCsrf);
+
 // Temporary login helper for skeleton phase only.
 app.get('/login-as/:role', (req, res) => {
-  const role = req.params.role;
-  if (!Object.values(ROLES).includes(role)) {
-    return res.status(400).send('Invalid role. Use Patron, Staff or Admin.');
+  if (isProduction) {
+    return res.status(404).send('Not Found');
+  }
+
+  const inputRole = String(req.params.role || '').toUpperCase();
+  if (!Object.values(ROLES).includes(inputRole)) {
+    return res.status(400).send('Invalid role. Use PATRON, STAFF or ADMIN.');
   }
 
   req.session.user = {
     id: 1,
-    username: `${role.toLowerCase()}-demo`,
-    role,
+    username: `${inputRole.toLowerCase()}-demo`,
+    role: inputRole,
   };
 
-  return res.send(`Logged in as ${role}`);
+  return res.send(`Logged in as ${inputRole}`);
 });
 
 app.post('/logout', requireAuth, (req, res, next) => {

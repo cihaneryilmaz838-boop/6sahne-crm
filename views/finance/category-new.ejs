@@ -11,6 +11,7 @@
 <% } %>
 
 <form method="post" action="/finance/categories">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
   <p><label>Name <input name="name" required value="<%= form.name %>"></label></p>
   <p>
     <label>Direction

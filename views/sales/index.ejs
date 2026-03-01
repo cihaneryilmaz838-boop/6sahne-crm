@@ -48,6 +48,7 @@
         <td>
           <% if (!sale.is_cancelled) { %>
             <form class="inline" method="post" action="/sales/<%= sale.id %>/cancel">
+              <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
               <input type="text" name="cancel_reason" placeholder="Cancel reason" minlength="3" required>
               <button type="submit">Cancel</button>
             </form>
