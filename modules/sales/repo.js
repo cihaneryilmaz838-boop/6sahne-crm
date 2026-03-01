@@ -1,5 +1,23 @@
 const db = require('../../core/db');
 
+const insertAuditStmt = db.prepare(`
+  INSERT INTO audit_log (
+    action_type,
+    actor_user_id,
+    entity_type,
+    entity_id,
+    reason,
+    payload_json
+  ) VALUES (
+    @action_type,
+    @actor_user_id,
+    @entity_type,
+    @entity_id,
+    @reason,
+    @payload_json
+  )
+`);
+
 function listBooks() {
   return db
     .prepare(
@@ -17,13 +35,38 @@ function listLocations() {
 function listIncomeCategories() {
   return db
     .prepare(
-      `SELECT id, name, direction
+      `SELECT id, name, direction, is_active
        FROM categories
        WHERE is_active = 1
          AND direction = 'IN'
        ORDER BY name ASC, id ASC`
     )
     .all();
+}
+
+function listRecentSales(limit = 100) {
+  return db
+    .prepare(
+      `SELECT
+        s.id,
+        s.book_id,
+        s.location_id,
+        s.quantity,
+        s.total_amount,
+        s.payment_method,
+        s.created_at,
+        s.is_cancelled,
+        s.cancelled_at,
+        s.cancel_reason,
+        b.title AS book_title,
+        l.name AS location_name
+       FROM sales s
+       JOIN books b ON b.id = s.book_id
+       JOIN locations l ON l.id = s.location_id
+       ORDER BY s.created_at DESC, s.id DESC
+       LIMIT ?`
+    )
+    .all(limit);
 }
 
 function getBookById(id) {
@@ -150,14 +193,148 @@ function createSaleWithEffects(payload) {
   return tx(payload);
 }
 
+function getSaleById(id) {
+  return db.prepare('SELECT * FROM sales WHERE id = ?').get(id);
+}
+
+function findActiveFinanceTxBySaleId(saleId) {
+  return db
+    .prepare(
+      `SELECT *
+       FROM finance_transactions
+       WHERE ref_type = 'sale'
+         AND ref_id = ?
+         AND direction = 'IN'
+         AND is_cancelled = 0
+       ORDER BY id DESC
+       LIMIT 1`
+    )
+    .get(saleId);
+}
+
+function writeAudit({ actionType, actorUserId, entityType, entityId, reason = null, payload = null }) {
+  insertAuditStmt.run({
+    action_type: actionType,
+    actor_user_id: actorUserId,
+    entity_type: entityType,
+    entity_id: entityId,
+    reason,
+    payload_json: payload ? JSON.stringify(payload) : null,
+  });
+}
+
+function cancelSaleWithEffects({ saleId, reason, currentUserId }) {
+  const tx = db.transaction((input) => {
+    const sale = getSaleById(input.saleId);
+    if (!sale) {
+      throw new Error('SALE_NOT_FOUND');
+    }
+    if (sale.is_cancelled) {
+      throw new Error('SALE_ALREADY_CANCELLED');
+    }
+
+    db.prepare(
+      `UPDATE sales
+       SET is_cancelled = 1,
+           cancelled_at = datetime('now'),
+           cancelled_by = ?,
+           cancel_reason = ?
+       WHERE id = ?`
+    ).run(input.currentUserId, input.reason, sale.id);
+
+    ensureStockRow(sale.book_id, sale.location_id);
+    const stock = getStockRow(sale.book_id, sale.location_id);
+    const stockBefore = stock ? stock.quantity : 0;
+    const stockAfter = stockBefore + sale.quantity;
+    updateStockQuantity(sale.book_id, sale.location_id, stockAfter);
+
+    const movementId = insertInventoryMovement({
+      book_id: sale.book_id,
+      from_location_id: null,
+      to_location_id: sale.location_id,
+      quantity: sale.quantity,
+      note: `SALE_CANCEL ${sale.id}`,
+      created_by: input.currentUserId,
+    });
+
+    const financeTx = findActiveFinanceTxBySaleId(sale.id);
+    let cancelledFinanceTxId = null;
+    if (financeTx) {
+      db.prepare(
+        `UPDATE finance_transactions
+         SET is_cancelled = 1,
+             cancelled_at = datetime('now'),
+             cancelled_by = ?,
+             cancel_reason = ?,
+             updated_at = datetime('now'),
+             updated_by = ?
+         WHERE id = ?`
+      ).run(input.currentUserId, input.reason, input.currentUserId, financeTx.id);
+
+      cancelledFinanceTxId = financeTx.id;
+    }
+
+    writeAudit({
+      actionType: 'CANCEL',
+      actorUserId: input.currentUserId,
+      entityType: 'sale',
+      entityId: sale.id,
+      reason: input.reason,
+      payload: {
+        stock_before: stockBefore,
+        stock_after: stockAfter,
+      },
+    });
+
+    writeAudit({
+      actionType: 'CREATE',
+      actorUserId: input.currentUserId,
+      entityType: 'stock_tx',
+      entityId: movementId,
+      payload: {
+        movement_type: 'SALE_CANCEL',
+        sale_id: sale.id,
+        book_id: sale.book_id,
+        location_id: sale.location_id,
+        quantity: sale.quantity,
+      },
+    });
+
+    if (cancelledFinanceTxId) {
+      writeAudit({
+        actionType: 'CANCEL',
+        actorUserId: input.currentUserId,
+        entityType: 'finance_tx',
+        entityId: cancelledFinanceTxId,
+        reason: input.reason,
+        payload: {
+          ref_type: 'sale',
+          ref_id: sale.id,
+        },
+      });
+    }
+
+    return {
+      saleId: sale.id,
+      movementId,
+      financeTxId: cancelledFinanceTxId,
+      financeTxMissing: !cancelledFinanceTxId,
+    };
+  });
+
+  return tx({ saleId, reason, currentUserId });
+}
+
 module.exports = {
   listBooks,
   listLocations,
   listIncomeCategories,
+  listRecentSales,
   getBookById,
   getLocationById,
   getCategoryById,
   ensureStockRow,
   getStockRow,
   createSaleWithEffects,
+  cancelSaleWithEffects,
 };

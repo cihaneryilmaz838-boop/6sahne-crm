@@ -76,6 +76,7 @@
 </table>
 
 <h2>4) Recent Sales</h2>
+<p class="muted">Active total (excluding cancelled): <%= recentSalesActiveTotal %> TRY</p>
 <table>
   <thead>
     <tr>
@@ -85,11 +86,12 @@
       <th>Qty</th>
       <th>Amount</th>
       <th>Payment Method</th>
+      <th>Status</th>
     </tr>
   </thead>
   <tbody>
     <% if (recentSales.length === 0) { %>
-      <tr><td colspan="6">No sales yet.</td></tr>
+      <tr><td colspan="7">No sales yet.</td></tr>
     <% } %>
     <% recentSales.forEach((sale) => { %>
       <tr>
@@ -99,6 +101,7 @@
         <td><%= sale.quantity %></td>
         <td><%= sale.total_amount %> TRY</td>
         <td><%= sale.payment_method %></td>
+        <td><%= sale.is_cancelled ? 'Cancelled' : 'Active' %></td>
       </tr>
     <% }) %>
   </tbody>

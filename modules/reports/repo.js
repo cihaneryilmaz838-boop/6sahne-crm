@@ -100,7 +100,8 @@ function listRecentSales(limit = 20) {
         b.title AS book_title,
         s.quantity,
         s.total_amount,
-        s.payment_method
+        s.payment_method,
+        s.is_cancelled
        FROM sales s
        JOIN books b ON b.id = s.book_id
        ORDER BY s.created_at DESC, s.id DESC

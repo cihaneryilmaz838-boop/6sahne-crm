@@ -147,8 +147,51 @@ function createSale(body, currentUser) {
   }
 }
 
+function listSales() {
+  return repo.listRecentSales(100);
+}
+
+function cancelSale(id, cancelReason, currentUser) {
+  const saleId = Number(id);
+  const reason = String(cancelReason || '').trim();
+
+  if (!Number.isInteger(saleId) || saleId <= 0) {
+    return { errors: ['Sale not found.'] };
+  }
+
+  if (!reason || reason.length < 3) {
+    return { errors: ['Cancel reason is required and must be at least 3 characters.'] };
+  }
+
+  try {
+    const result = repo.cancelSaleWithEffects({
+      saleId,
+      reason,
+      currentUserId: currentUser.id,
+    });
+
+    return {
+      saleId: result.saleId,
+      warning: result.financeTxMissing
+        ? 'Sale cancelled and stock restored, but no active finance transaction was found for this sale.'
+        : null,
+    };
+  } catch (error) {
+    if (error && error.message === 'SALE_NOT_FOUND') {
+      return { errors: ['Sale not found.'] };
+    }
+    if (error && error.message === 'SALE_ALREADY_CANCELLED') {
+      return { errors: ['Sale is already cancelled.'] };
+    }
+
+    throw error;
+  }
+}
+
 module.exports = {
   PAYMENT_METHOD_VALUES,
   defaultSaleForm,
   createSale,
+  listSales,
+  cancelSale,
 };

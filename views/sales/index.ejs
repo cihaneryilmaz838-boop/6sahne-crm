@@ -1,0 +1,63 @@
+<%- include('../_header', { title }) %>
+
+<h1>Sales</h1>
+
+<p><a href="/sales/new">+ New Sale</a></p>
+
+<% if (flash) { %>
+  <div class="<%= flash.type === 'error' ? 'errors' : 'muted' %>">
+    <%= flash.message %>
+  </div>
+<% } %>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Status</th>
+      <th>Book</th>
+      <th>Location</th>
+      <th>Qty</th>
+      <th>Total</th>
+      <th>Payment</th>
+      <th>Created At</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (sales.length === 0) { %>
+      <tr><td colspan="9">No sales found.</td></tr>
+    <% } %>
+    <% sales.forEach((sale) => { %>
+      <tr>
+        <td><%= sale.id %></td>
+        <td>
+          <% if (sale.is_cancelled) { %>
+            <div class="cancelled">Cancelled</div>
+            <div class="muted"><%= sale.cancelled_at %> - <%= sale.cancel_reason %></div>
+          <% } else { %>
+            Active
+          <% } %>
+        </td>
+        <td><%= sale.book_title %></td>
+        <td><%= sale.location_name %></td>
+        <td><%= sale.quantity %></td>
+        <td><%= sale.total_amount %> TRY</td>
+        <td><%= sale.payment_method %></td>
+        <td><%= sale.created_at %></td>
+        <td>
+          <% if (!sale.is_cancelled) { %>
+            <form class="inline" method="post" action="/sales/<%= sale.id %>/cancel">
+              <input type="text" name="cancel_reason" placeholder="Cancel reason" minlength="3" required>
+              <button type="submit">Cancel</button>
+            </form>
+          <% } else { %>
+            -
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../_footer') %>
