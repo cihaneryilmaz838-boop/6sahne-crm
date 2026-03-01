@@ -48,6 +48,32 @@ router.post('/move', (req, res) => {
   return res.redirect(`/inventory?book_id=${req.body.book_id}`);
 });
 
+router.get('/adjust', (req, res) => {
+  return res.render('inventory/adjust', {
+    title: 'Adjust Stock',
+    books: repo.listBooks().filter((book) => book.is_active),
+    locations: repo.listLocations(),
+    form: service.defaultAdjustForm(),
+    errors: [],
+  });
+});
+
+router.post('/adjust', (req, res) => {
+  const result = service.adjustStock(req.body, req.user);
+
+  if (result.errors) {
+    return res.status(422).render('inventory/adjust', {
+      title: 'Adjust Stock',
+      books: repo.listBooks().filter((book) => book.is_active),
+      locations: repo.listLocations(),
+      form: req.body,
+      errors: result.errors,
+    });
+  }
+
+  return res.redirect(`/inventory?book_id=${req.body.book_id}`);
+});
+
 router.get('/locations', (req, res) => {
   return res.render('inventory/locations', {
     title: 'Locations',
