@@ -21,7 +21,7 @@ function initializeSchema(db) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('Patron', 'Staff', 'Admin')),
+      role TEXT NOT NULL CHECK(role IN ('PATRON', 'STAFF', 'ADMIN')),
       is_active INTEGER NOT NULL DEFAULT 1,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))

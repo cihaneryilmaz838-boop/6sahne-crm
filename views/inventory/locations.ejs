@@ -12,6 +12,7 @@
 <% } %>
 
 <form method="post" action="/inventory/locations">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
   <label>Name <input type="text" name="name" required value="<%= form.name || '' %>" placeholder="DEPO"></label>
   <button type="submit">Add Location</button>
 </form>

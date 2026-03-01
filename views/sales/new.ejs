@@ -17,6 +17,7 @@
 <% } %>
 
 <form method="post" action="/sales">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
   <p>
     <label>Book</label><br>
     <select name="book_id" required>

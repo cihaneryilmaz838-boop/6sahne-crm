@@ -28,10 +28,10 @@ npm start
 Then open:
 - `http://localhost:3000`
 
-Quick role login for skeleton testing:
-- `GET /login-as/Patron`
-- `GET /login-as/Staff`
-- `GET /login-as/Admin`
+Quick role login for skeleton testing (development only):
+- `GET /login-as/PATRON`
+- `GET /login-as/STAFF`
+- `GET /login-as/ADMIN`
 
 Module endpoints are mounted but intentionally return `Not implemented yet`.
 

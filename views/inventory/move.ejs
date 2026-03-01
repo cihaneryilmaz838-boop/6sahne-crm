@@ -12,6 +12,7 @@
 <% } %>
 
 <form method="post" action="/inventory/move">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
   <p>
     <label>Book
       <select name="book_id" required>
