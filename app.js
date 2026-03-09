@@ -15,6 +15,7 @@ const booksRoutes = require('./modules/books/routes');
 const inventoryRoutes = require('./modules/inventory/routes');
 const salesRoutes = require('./modules/sales/routes');
 const reportsRoutes = require('./modules/reports/routes');
+const adminUsersRoutes = require('./modules/adminUsers/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -85,6 +86,13 @@ app.use(
 app.use(attachCsrfToken);
 app.use(attachCurrentUser);
 app.use(requireCsrf);
+app.use((req, res, next) => {
+  res.locals.flash = req.session ? req.session.flash || null : null;
+  if (req.session) {
+    req.session.flash = null;
+  }
+  next();
+});
 
 app.get('/login', (req, res) => {
   if (req.session && req.session.user) {
@@ -242,6 +250,7 @@ app.use('/books', requireAuth, requireRole(ROLES.STAFF, ROLES.ADMIN), booksRoute
 app.use('/inventory', requireAuth, requireRole(ROLES.STAFF, ROLES.ADMIN), inventoryRoutes);
 app.use('/sales', requireAuth, requireRole(ROLES.STAFF, ROLES.ADMIN), salesRoutes);
 app.use('/reports', requireAuth, requireRole(ROLES.PATRON, ROLES.STAFF, ROLES.ADMIN), reportsRoutes);
+app.use('/admin/users', requireAuth, requireRole(ROLES.ADMIN), adminUsersRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

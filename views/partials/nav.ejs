@@ -11,6 +11,9 @@
     <a class="nav-link <%= isActive(['/inventory']) ? 'active' : '' %>" href="/inventory">Inventory</a>
     <a class="nav-link <%= isActive(['/sales']) ? 'active' : '' %>" href="/sales">Sales</a>
     <a class="nav-link <%= isActive(['/reports']) ? 'active' : '' %>" href="/reports">Reports</a>
+    <% if (currentUser.role === 'ADMIN') { %>
+      <a class="nav-link <%= isActive(['/admin/users']) ? 'active' : '' %>" href="/admin/users">Users</a>
+    <% } %>
     <a class="nav-link <%= isActive(['/account/password']) ? 'active' : '' %>" href="/account/password">Change Password</a>
     <form method="post" action="/logout" class="inline logout-form">
       <input type="hidden" name="csrf_token" value="<%= csrfToken %>">

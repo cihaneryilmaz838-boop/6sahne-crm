@@ -1,0 +1,61 @@
+<%- include('../../_header', { title }) %>
+
+<h1>User #<%= user.id %></h1>
+
+<section class="card">
+  <p><strong>Username:</strong> <%= user.username %></p>
+  <p><strong>Created At:</strong> <%= user.created_at %></p>
+  <p><strong>Status:</strong>
+    <% if (user.is_active) { %>
+      <span class="status-badge status-active">ACTIVE</span>
+    <% } else { %>
+      <span class="status-badge status-cancelled">INACTIVE</span>
+    <% } %>
+  </p>
+</section>
+
+<h2>Update Role & Status</h2>
+<form method="post" action="/admin/users/<%= user.id %>">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+
+  <label>
+    Role
+    <select name="role" required>
+      <% roles.forEach((role) => { %>
+        <option value="<%= role %>" <%= updateForm.role === role ? 'selected' : '' %>><%= role %></option>
+      <% }) %>
+    </select>
+  </label>
+
+  <label>
+    <input type="checkbox" name="is_active" value="1" <%= updateForm.is_active ? 'checked' : '' %>>
+    Active User
+  </label>
+
+  <div>
+    <button type="submit">Save Changes</button>
+  </div>
+</form>
+
+<h2>Reset Password</h2>
+<form method="post" action="/admin/users/<%= user.id %>/reset-password">
+  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+
+  <label>
+    New Password
+    <input type="password" name="new_password" required>
+  </label>
+
+  <label>
+    Confirm New Password
+    <input type="password" name="confirm_new_password" required>
+  </label>
+
+  <div>
+    <button type="submit">Reset Password</button>
+  </div>
+</form>
+
+<p><a href="/admin/users">Back to user list</a></p>
+
+<%- include('../../_footer') %>
